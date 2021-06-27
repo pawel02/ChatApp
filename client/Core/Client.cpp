@@ -66,9 +66,9 @@ void Client::do_write()
 	auto self{ shared_from_this() };
 
 	// add the necessary metadata
-	std::shared_ptr<char[]> data = common::Utils::addHeader(writeData._data.get(), writeData._size, common::MessageType::plainText);
+	uint8_t* data = common::Utils::addHeader(writeData._data.get(), writeData._size, common::MessageType::plainText);
 
-	boost::asio::async_write(_socket, boost::asio::buffer(data.get(), writeData._size + common::headerSize), 
+	boost::asio::async_write(_socket, boost::asio::buffer(data, writeData._size + common::headerSize), 
 	[this, self, data] (const boost::system::error_code& ec, size_t length)
 		{
 			if (_stopped)
@@ -76,6 +76,7 @@ void Client::do_write()
 
 			if (!ec)
 			{
+				delete[] data;
 				do_write();
 			}
 			else
@@ -104,9 +105,9 @@ void Client::do_read()
 
 				// Get the metadata
 				receivedLength += length;
-				if (receivedLength > 9 && _messageSize == 0)
+				if (receivedLength > 5 && _messageSize == 0)
 				{
-					std::memcpy(&_messageSize, _receiveData.data() + 2, sizeof(unsigned long long));
+					std::memcpy(&_messageSize, _receiveData.data() + 2, sizeof(uint64_t));
 					_messageSize += common::headerSize;
 				}
 
@@ -114,7 +115,7 @@ void Client::do_read()
 				{
 					// add the message to the receiveQueue
 					receivedLength -= common::headerSize;
-					std::cout.write(_receiveData.data() + 10, receivedLength);
+					std::cout.write(((char*)_receiveData.data()) + common::headerSize, receivedLength);
 					std::cout << "\n";
 					/*
 					TODO

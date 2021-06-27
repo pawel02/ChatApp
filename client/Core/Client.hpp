@@ -47,10 +47,10 @@ private:
 
 	enum {maxLength = 1024};
 
-	unsigned long long _messageSize = 0;
-	unsigned long long receivedLength = 0;
-	std::vector<char> _data;
-	std::vector<char> _receiveData;
+	uint64_t _messageSize = 0;
+	uint64_t receivedLength = 0;
+	std::vector<uint8_t> _data;
+	std::vector<uint8_t> _receiveData;
 
 	// Queues for communicating between the UI and this thread
 	common::tsQueue<common::CommunicateData> _writeQueue;

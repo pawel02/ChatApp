@@ -19,7 +19,7 @@ private:
 
 private:
 	enum { maxLength = 1024 };
-	char data[maxLength];
+	uint8_t data[maxLength];
 
 	boost::asio::ip::tcp::socket _socket;
 };

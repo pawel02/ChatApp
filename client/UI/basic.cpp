@@ -16,7 +16,7 @@ void BasicUI::start()
 		std::string input;
 		std::getline(std::cin, input);
 
-		_writeQueue->push(common::CommunicateData{ input.data(), input.size()});
+		_writeQueue->push(common::CommunicateData{ (uint8_t*)input.data(), input.size()});
 	}
 
 }

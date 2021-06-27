@@ -31,15 +31,15 @@ namespace common
     struct CommunicateData
     {
         // stores the data on the heap as it could be big
-        std::unique_ptr<char[]> _data;
-        unsigned long long _size;
+        std::unique_ptr<uint8_t[]> _data;
+        uint64_t _size;
 
         /*
         Constructor will copy the data stored under the pointer to make
         sure that it is the one which owns it
         */
-        CommunicateData(char* data, unsigned long long size) noexcept
-            :_data{ new char[size] }, _size{ size }
+        CommunicateData(uint8_t* data, uint64_t size) noexcept
+            :_data{ new uint8_t[size] }, _size{ size }
         {
             std::memcpy(_data.get(), data, size);
         }
@@ -47,7 +47,7 @@ namespace common
         /*
         In case you are using smart pointers already you can avoid the copy
         */
-        CommunicateData(std::unique_ptr<char[]>&& data, unsigned long long size) noexcept
+        CommunicateData(std::unique_ptr<uint8_t[]>&& data, uint64_t size) noexcept
             :_data{std::move(data)}, _size{size}
         {}
 
@@ -57,7 +57,7 @@ namespace common
         {}
 
         CommunicateData(const CommunicateData& other) noexcept
-            :_data{new char[other._size]},
+            :_data{new uint8_t[other._size]},
             _size{other._size}
         {
             std::memcpy(_data.get(), other._data.get(), other._size);
