@@ -69,20 +69,20 @@ void Client::do_write()
 	uint8_t* data = common::Utils::addHeader(writeData._data.get(), writeData._size, common::MessageType::plainText);
 
 	boost::asio::async_write(_socket, boost::asio::buffer(data, writeData._size + common::headerSize), 
-	[this, self, data] (const boost::system::error_code& ec, size_t length)
+	[self, data] (const boost::system::error_code& ec, size_t length)
 		{
-			if (_stopped)
+			if (self->_stopped)
 				return;
 
 			if (!ec)
 			{
-				delete[] data;
-				do_write();
+				delete[] data; // release the buffer
+				self->do_write();
 			}
 			else
 			{
 				std::cerr << ec.message() << "\n";
-				stop();
+				self->stop();
 			}
 		});
 }
@@ -92,51 +92,46 @@ void Client::do_read()
 	auto self{ shared_from_this() };
 	_deadline.expires_after(std::chrono::seconds(expiryTime));
 
-	_socket.async_read_some(boost::asio::buffer(_data, maxLength), [this, self]
+	_socket.async_read_some(boost::asio::buffer(_data, maxLength), [self]
 	(boost::system::error_code ec, size_t length)
 		{
-			if (_stopped)
+			if (self->_stopped)
 				return;
 
 			if (!ec)
 			{
 				// add the data to receive data
-				_receiveData.insert(_receiveData.end(), _data.begin(), _data.end());
+				self->_receiveData.insert(self->_receiveData.end(), self->_data.begin(), self->_data.end());
 
 				// Get the metadata
-				receivedLength += length;
-				if (receivedLength > 5 && _messageSize == 0)
+				self->receivedLength += length;
+				if (self->receivedLength > 5 && self->_messageSize == 0)
 				{
-					std::memcpy(&_messageSize, _receiveData.data() + 2, sizeof(uint64_t));
-					_messageSize += common::headerSize;
+					std::memcpy(&self->_messageSize, self->_receiveData.data() + 2, sizeof(uint64_t));
+					self->_messageSize += common::headerSize;
 				}
 
-				if (receivedLength == _messageSize)
+				if (self->receivedLength == self->_messageSize)
 				{
 					// add the message to the receiveQueue
-					receivedLength -= common::headerSize;
-					std::cout.write(((char*)_receiveData.data()) + common::headerSize, receivedLength);
-					std::cout << "\n";
-					/*
-					TODO
-					_receiveQueue.push({
-						std::move(_receiveData.data()),
-						_receiveData.size()
-					});*/
+					self->receivedLength -= common::headerSize;
+
+					// add message to receive queue without the header
+					self->_receiveQueue.push(common::CommunicateData{ self->_receiveData.data() + common::headerSize, self->receivedLength});
 
 					// reset everything ready for the next message
-					_messageSize = 0;
-					receivedLength = 0;
-					_receiveData.clear();
+					self->_messageSize = 0;
+					self->receivedLength = 0;
+					self->_receiveData.clear();
 				}
 
 				// read some more
-				do_read();
+				self->do_read();
 			}
 			else
 			{
 				std::cerr << ec.message() << "\n";
-				stop();
+				self->stop();
 			}
 		
 		});

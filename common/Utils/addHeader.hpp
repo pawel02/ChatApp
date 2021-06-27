@@ -19,7 +19,6 @@ namespace common
         */
         static uint8_t* addHeader(uint8_t* data, uint64_t size, const MessageType& messageType) noexcept
         {
-            // 10 is the size of the header read the spec for more details
             uint8_t* _data =  new uint8_t[size + headerSize];
 
             // by default this will only be the default message

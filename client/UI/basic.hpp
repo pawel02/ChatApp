@@ -14,6 +14,10 @@ public:
 	void start();
 
 private:
+	void handleInput();
+	void handleReceive();
+
+private:
 	common::tsQueue<common::CommunicateData>* _receiveQueue;
 	common::tsQueue<common::CommunicateData>* _writeQueue;
 };
