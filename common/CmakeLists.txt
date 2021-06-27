@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.1)
+
+project(CommonLib VERSION 0.1)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
+
+file(GLOB_RECURSE UTILS 
+    PRIVATE "${PROJECT_SOURCE_DIR}/Utils/*.hpp"
+    PRIVATE "${PROJECT_SOURCE_DIR}/Utils/*.cpp"
+)
+
+add_library(${PROJECT_NAME} 
+    Source.cpp
+    ${UTILS}
+)
+
+source_group("Utils"                FILES ${UTILS})
