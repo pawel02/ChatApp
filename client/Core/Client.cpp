@@ -12,7 +12,6 @@ Client::Client(boost::asio::io_context* ctx, const std::string& host
 	_deadline{*ctx}
 {
 	_data.resize(maxLength);
-	
 	_receiveData.reserve(maxLength);
 }
 
@@ -108,7 +107,7 @@ void Client::do_read()
 
 				// Get the metadata
 				self->receivedLength += length;
-				if (self->receivedLength > 5 && self->_messageSize == 0)
+				if (self->receivedLength > Header::headerSize - 1 && self->_messageSize == 0)
 				{
 					std::memcpy(&self->_messageSize, self->_receiveData.data() + 2, sizeof(uint64_t));
 					self->_messageSize += Header::headerSize;
