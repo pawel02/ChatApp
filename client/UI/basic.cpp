@@ -2,12 +2,15 @@
 #include <thread>
 #include "basic.hpp"
 
-BasicUI::BasicUI(common::tsQueue<common::CommunicateData<std::vector<uint8_t>>>* receiveQueue,
-	common::tsQueue<common::CommunicateData<Utils::ISerializable>>* writeQueue) noexcept
-	:_receiveQueue{receiveQueue}, _writeQueue{writeQueue}
-{}
+using namespace Networking;
 
-void BasicUI::start() 
+BasicUI::BasicUI(Containers::tsQueue<DataTypes::CommunicateData<std::vector<uint8_t>>>* receiveQueue, 
+	Containers::tsQueue<DataTypes::CommunicateData<Serialization::ISerializable>>* writeQueue) noexcept
+	:_receiveQueue{receiveQueue}, _writeQueue{writeQueue}
+{
+}
+
+void BasicUI::start()
 {
 	std::thread inputThread([&]() {
 		handleInput();
@@ -31,8 +34,8 @@ void BasicUI::handleInput()
 		std::string input;
 		std::getline(std::cin, input);
 
-		std::shared_ptr<common::stringSerialize> tmp = std::make_shared<common::stringSerialize>(std::move(input));
-		_writeQueue->push(common::CommunicateData<Utils::ISerializable>{ tmp, input.size() });
+		std::shared_ptr<DataTypes::stringSerialize> tmp = std::make_shared<DataTypes::stringSerialize>(input);
+		_writeQueue->push(DataTypes::CommunicateData<Serialization::ISerializable>{ tmp, input.size() });
 	}
 }
 
@@ -40,7 +43,7 @@ void BasicUI::handleReceive()
 {
 	while (true)
 	{
-		common::CommunicateData<std::vector<uint8_t>> data = _receiveQueue->pop();
+		DataTypes::CommunicateData<std::vector<uint8_t>> data = _receiveQueue->pop();
 
 		// figure out what the data format is based on the header use the factory pattern HERE
 		// Also make sure that you have the correct number of bytes
@@ -48,7 +51,7 @@ void BasicUI::handleReceive()
 		if (dataType == 0)
 		{
 			// This is plain text (Create a type for this)
-			char* text = (char*)data._data->data() + common::headerSize;
+			char* text = (char*)data._data->data() + Header::headerSize;
 			size_t dataSize = data._size;
 
 			std::cout.write(text, dataSize);

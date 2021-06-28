@@ -2,7 +2,9 @@
 #include <memory>
 #include <iostream>
 
-namespace common
+namespace Networking
+{
+namespace Header
 {
     static constexpr int headerSize = 2 + sizeof(uint64_t);
 
@@ -30,6 +32,6 @@ namespace common
         std::memcpy(_data + headerSize, data, size);
         return _data;
     }
-
+}
 }
 

@@ -3,6 +3,8 @@
 #include <chrono>
 #include "Client.hpp"
 
+using namespace Networking;
+
 Client::Client(boost::asio::io_context* ctx, const std::string& host
 	, const std::string& port) noexcept
 	:_socket{ *ctx }, _resolver{*ctx},
@@ -61,15 +63,15 @@ void Client::connect()
 void Client::do_write()
 {
 	// get the latest message in the queue
-	common::CommunicateData writeData = _writeQueue.pop();
+	DataTypes::CommunicateData writeData = _writeQueue.pop();
 
 	_deadline.expires_after(std::chrono::seconds(expiryTime));
 	auto self{ shared_from_this() };
 
 	// add the necessary metadata
-	uint8_t* data = common::addHeader(writeData._data->Serialize(), writeData._size, common::MessageType::plainText);
+	uint8_t* data = Header::addHeader(writeData._data->Serialize(), writeData._size, Header::MessageType::plainText);
 
-	boost::asio::async_write(_socket, boost::asio::buffer(data, writeData._size + common::headerSize), 
+	boost::asio::async_write(_socket, boost::asio::buffer(data, writeData._size + Header::headerSize), 
 	[self, data] (const boost::system::error_code& ec, size_t length)
 		{
 			if (self->_stopped)
@@ -109,17 +111,17 @@ void Client::do_read()
 				if (self->receivedLength > 5 && self->_messageSize == 0)
 				{
 					std::memcpy(&self->_messageSize, self->_receiveData.data() + 2, sizeof(uint64_t));
-					self->_messageSize += common::headerSize;
+					self->_messageSize += Header::headerSize;
 				}
 
 				if (self->receivedLength == self->_messageSize)
 				{
 					// add the message to the receiveQueue
-					self->receivedLength -= common::headerSize;
+					self->receivedLength -= Header::headerSize;
 
 					// add message to receive queue without the header
 					std::shared_ptr<std::vector<uint8_t>> tmp = std::make_shared<std::vector<uint8_t>>(std::move(self->_receiveData));
-					self->_receiveQueue.push(common::CommunicateData<std::vector<uint8_t>>{ tmp , self->receivedLength});
+					self->_receiveQueue.push(DataTypes::CommunicateData<std::vector<uint8_t>>{ tmp , self->receivedLength});
 
 					// reset everything ready for the next message
 					self->_messageSize = 0;

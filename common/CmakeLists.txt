@@ -5,14 +5,23 @@ project(CommonLib VERSION 0.1)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
-file(GLOB_RECURSE UTILS 
-    PRIVATE "${PROJECT_SOURCE_DIR}/Utils/*.hpp"
-    PRIVATE "${PROJECT_SOURCE_DIR}/Utils/*.cpp"
+file(GLOB_RECURSE CONTAINERS 
+    PRIVATE "${PROJECT_SOURCE_DIR}/Containers/*.hpp"
+    PRIVATE "${PROJECT_SOURCE_DIR}/Containers/*.cpp"
 )
+
+file(GLOB_RECURSE NETWORKING 
+    PRIVATE "${PROJECT_SOURCE_DIR}/Networking/*.hpp"
+    PRIVATE "${PROJECT_SOURCE_DIR}/Networking/*.cpp"
+)
+
 
 add_library(${PROJECT_NAME} 
     Source.cpp
-    ${UTILS}
+    ${CONTAINERS}
+    ${NETWORKING}
 )
 
-source_group("Utils"                FILES ${UTILS})
+source_group("Containers"                FILES ${CONTAINERS})
+source_group("Networking"                FILES ${NETWORKING})
+

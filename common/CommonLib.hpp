@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./Utils/ClientData.hpp"
-#include "./Utils/tsQueue.hpp"
-#include "Utils/utils.hpp"
-#include "./Utils/addHeader.hpp"
+#include "Networking/NetworkTypes.hpp"
+#include "Containers/tsQueue.hpp"
+#include "Networking/Serialization.hpp"
+#include "Networking/HeaderHandlers.hpp"

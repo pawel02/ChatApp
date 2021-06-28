@@ -3,7 +3,7 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace common
+namespace Containers
 {
 /*
 Simple threadsafe queue that which can be used to await messages
