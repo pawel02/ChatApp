@@ -16,7 +16,6 @@ void Session::do_read()
 
 	_socket.async_read_some(boost::asio::buffer(data, maxLength), [this, self]
 	(boost::system::error_code ec, size_t length) {
-			std::cout << length << "\n";
 			if (!ec)
 			{
 				// simply echo back the message for now

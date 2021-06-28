@@ -10,6 +10,7 @@ Client::Client(boost::asio::io_context* ctx, const std::string& host
 	_deadline{*ctx}
 {
 	_data.resize(maxLength);
+	
 	_receiveData.reserve(maxLength);
 }
 
@@ -66,7 +67,7 @@ void Client::do_write()
 	auto self{ shared_from_this() };
 
 	// add the necessary metadata
-	uint8_t* data = common::Utils::addHeader(writeData._data.get(), writeData._size, common::MessageType::plainText);
+	uint8_t* data = common::addHeader(writeData._data->Serialize(), writeData._size, common::MessageType::plainText);
 
 	boost::asio::async_write(_socket, boost::asio::buffer(data, writeData._size + common::headerSize), 
 	[self, data] (const boost::system::error_code& ec, size_t length)
@@ -117,7 +118,8 @@ void Client::do_read()
 					self->receivedLength -= common::headerSize;
 
 					// add message to receive queue without the header
-					self->_receiveQueue.push(common::CommunicateData{ self->_receiveData.data() + common::headerSize, self->receivedLength});
+					std::shared_ptr<std::vector<uint8_t>> tmp = std::make_shared<std::vector<uint8_t>>(std::move(self->_receiveData));
+					self->_receiveQueue.push(common::CommunicateData<std::vector<uint8_t>>{ tmp , self->receivedLength});
 
 					// reset everything ready for the next message
 					self->_messageSize = 0;

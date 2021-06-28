@@ -36,11 +36,15 @@ source_group("Utils"               FILES ${UTILS})
 target_include_directories(${PROJECT_NAME} 
     PRIVATE "C:/Boost/boost"
     PRIVATE "${PROJECT_SOURCE_DIR}/../common"
+    PRIVATE "C:/openssl/include64"
 )
 
 
 target_link_directories(${PROJECT_NAME}
     PRIVATE "C:/Boost/boost/lib"
+    PRIVATE "C:/openssl/lib64"
 )
 
-target_link_libraries(${PROJECT_NAME} CommonLib)
+target_link_libraries(${PROJECT_NAME} 
+    CommonLib
+)
