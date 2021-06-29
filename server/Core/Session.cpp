@@ -3,7 +3,7 @@
 
 using namespace Networking;
 
-Session::Session(boost::asio::ip::tcp::socket socket) noexcept
+Session::Session(boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket) noexcept
 	:_socket{ std::move(socket) }
 {
 	_data.resize(maxLength);
@@ -12,7 +12,21 @@ Session::Session(boost::asio::ip::tcp::socket socket) noexcept
 
 void Session::start()
 {
-	do_read();
+	do_handshake();
+}
+
+void Session::do_handshake() 
+{
+	auto self{ shared_from_this() };
+
+	_socket.async_handshake(boost::asio::ssl::stream_base::server,
+		[self](const boost::system::error_code& ec) {
+			if (!ec)
+			{
+				self->do_read();
+			}	
+		
+		});
 }
 
 void Session::do_read()

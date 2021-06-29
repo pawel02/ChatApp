@@ -32,19 +32,29 @@ source_group("Core"                FILES ${CORE})
 source_group("UI"                  FILES ${UI})
 source_group("Utils"               FILES ${UTILS})
 
+find_package(OpenSSL REQUIRED)
+
+message("OPENSSL_ROOT_DIR is "  ${OPENSSL_ROOT_DIR})
+message("OPENSSL_FOUND is "  ${OPENSSL_FOUND})
+message("OPENSSL_INCLUDE_DIR is "  ${OPENSSL_INCLUDE_DIR})
+message("OPENSSL_CRYPTO_LIBRARY is "  ${OPENSSL_CRYPTO_LIBRARY})
+message("OPENSSL_SSL_LIBRARY is "  ${OPENSSL_SSL_LIBRARY})
+message("OPENSSL_LIBRARIES is "  ${OPENSSL_LIBRARIES})
+message("OPENSSL_VERSION is "  ${OPENSSL_VERSION})
+
 #Add Libraries
 target_include_directories(${PROJECT_NAME} 
     PRIVATE "C:/Boost/boost"
     PRIVATE "${PROJECT_SOURCE_DIR}/../common"
-    PRIVATE "C:/openssl/include64"
+    PRIVATE ${OPENSSL_INCLUDE_DIR}
 )
 
 
 target_link_directories(${PROJECT_NAME}
     PRIVATE "C:/Boost/boost/lib"
-    PRIVATE "C:/openssl/lib64"
 )
 
 target_link_libraries(${PROJECT_NAME} 
     CommonLib
+    ${OPENSSL_LIBRARIES}
 )

@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <boost/asio.hpp>
-
+#include <boost/asio/ssl.hpp>
 #include <CommonLib.hpp>
 
 /*
@@ -11,11 +11,12 @@ class Session : public std::enable_shared_from_this<Session>
 {
 
 public:
-	Session(boost::asio::ip::tcp::socket socket) noexcept;
+	Session(boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket) noexcept;
 
 	void start();
 
 private:
+	void do_handshake();
 	void do_read();
 	void do_write();
 
@@ -28,5 +29,5 @@ private:
 	std::vector<uint8_t> _data;
 	std::vector<uint8_t> _receiveData;
 
-	boost::asio::ip::tcp::socket _socket;
+	boost::asio::ssl::stream<boost::asio::ip::tcp::socket> _socket;
 };

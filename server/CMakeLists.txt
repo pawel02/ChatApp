@@ -17,10 +17,13 @@ add_executable(${PROJECT_NAME}
 
 source_group("Core"                FILES ${CORE})
 
+find_package(OpenSSL REQUIRED)
+
 #Add Libraries
 target_include_directories(${PROJECT_NAME} 
     PRIVATE "C:/Boost/boost"
     PRIVATE "${PROJECT_SOURCE_DIR}/../common"
+    PRIVATE ${OPENSSL_INCLUDE_DIR}
 )
 
 
@@ -28,4 +31,7 @@ target_link_directories(${PROJECT_NAME}
     PRIVATE "C:/Boost/boost/lib"
 )
 
-target_link_libraries(${PROJECT_NAME} CommonLib)
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE CommonLib
+    PRIVATE ${OPENSSL_LIBRARIES}
+)

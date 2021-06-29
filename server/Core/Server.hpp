@@ -1,6 +1,6 @@
 #pragma once
-
 #include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 
 class Server
 {
@@ -13,4 +13,5 @@ private:
 
 private:
 	boost::asio::ip::tcp::acceptor _acceptor;
+	boost::asio::ssl::context _context;
 };

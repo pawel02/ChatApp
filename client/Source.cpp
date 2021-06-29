@@ -8,7 +8,7 @@ int main()
 {
     boost::asio::io_context context;
 
-    std::shared_ptr<Client> client = std::make_shared<Client>( &context, "127.0.0.1", "8080" );
+    std::shared_ptr<Client> client = std::make_shared<Client>( &context, "localhost", "8080" );
     client->connect();
 
 

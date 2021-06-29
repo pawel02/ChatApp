@@ -7,14 +7,27 @@ using namespace Networking;
 
 Client::Client(boost::asio::io_context* ctx, const std::string& host
 	, const std::string& port) noexcept
-	:_socket{ *ctx }, _resolver{*ctx},
+	:_context{ boost::asio::ssl::context::tlsv13_client },
+	_socket{ *ctx, _context }, _resolver{*ctx},
 	_host{host}, _port{port},
 	_deadline{*ctx}
 {
 	_data.resize(maxLength);
 	_receiveData.reserve(maxLength);
+
+	_context.load_verify_file("E:/pawel/coding(learning)/c++/chatApp/certs/csr.pem");
+	_context.set_verify_mode(boost::asio::ssl::verify_peer);
+	_socket.set_verify_callback(std::bind(&Client::verify_certificate, this, std::placeholders::_1, std::placeholders::_2));
 }
 
+bool Client::verify_certificate(bool preverified, boost::asio::ssl::verify_context& ctx)
+{
+	char subject_name[256];
+	X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
+	X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
+	std::cout << "Verifying " << subject_name << "\n";
+	return preverified;
+}
 
 void Client::connect()
 {
@@ -24,18 +37,16 @@ void Client::connect()
 	if (!ec)
 	{
 		_deadline.expires_after(std::chrono::seconds(expiryTime));
-		boost::asio::async_connect(_socket, results, [this, self]
+		boost::asio::async_connect(_socket.lowest_layer(), results, [this, self]
 		(const boost::system::error_code& ec, const boost::asio::ip::tcp::endpoint& ep) {
 				if (_stopped)
 					return;
 
-				if (_socket.is_open())
+				if (_socket.lowest_layer().is_open())
 				{
 					if (!ec)
 					{
-						// Start full duplex interaction with the server
-						do_write();
-						do_read();
+						handshake();
 					}
 					else
 					{
@@ -57,6 +68,23 @@ void Client::connect()
 		std::cerr << ec.message() << "\n";
 		stop();
 	}
+}
+
+void Client::handshake() 
+{
+	_socket.async_handshake(boost::asio::ssl::stream_base::client,
+		[this](const boost::system::error_code& ec) {
+			if (!ec)
+			{
+				// Start full duplex interaction with the server
+				do_write();
+				do_read();
+			}
+			else 
+			{
+				std::cout << "Handshake failed\n";
+			}
+		});
 }
 
 void Client::do_write()
@@ -144,7 +172,7 @@ void Client::stop()
 {
 	_stopped = true;
 	boost::system::error_code ignored_error;
-	_socket.close(ignored_error);
+	_socket.lowest_layer().close(ignored_error);
 	_deadline.cancel();
 }
 
@@ -158,7 +186,7 @@ void Client::check_deadline()
 		std::cout << "Expired\n";
 		_stopped = true;
 		boost::system::error_code ignored_error;
-		_socket.close(ignored_error);
+		_socket.lowest_layer().close(ignored_error);
 	}
 	else
 	{

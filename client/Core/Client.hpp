@@ -1,5 +1,6 @@
 #pragma once
 #include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 #include <string>
 #include <memory>
 #include <vector>
@@ -25,6 +26,11 @@ public:
 	Containers::tsQueue<Networking::DataTypes::CommunicateData<std::vector<uint8_t>>>* receiveQueue() noexcept { return &_receiveQueue; }
 
 private:
+	// This is only used to check if the verification of certificate was successful
+	// Since I have not played around installing the certificates this will always fail
+	bool verify_certificate(bool preverified, boost::asio::ssl::verify_context& ctx);
+	void handshake();
+
 	// Infinite loop of reading from the socket and putting the messages on the sharedQueue
 	void do_read();
 
@@ -39,7 +45,8 @@ private:
 	std::string _host;
 	std::string _port;
 
-	tcp::socket _socket;
+	boost::asio::ssl::context _context;
+	boost::asio::ssl::stream<tcp::socket> _socket;
 	tcp::resolver _resolver;
 
 	bool _stopped = false;
