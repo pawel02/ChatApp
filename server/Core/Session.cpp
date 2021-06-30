@@ -62,11 +62,11 @@ void Session::do_read()
 			}
 			else if (ec == boost::asio::error::connection_reset)
 			{
-				std::cout << "Client aborted the connection.\n";
+				WARN("Client aborted the connection.");
 			}
 			else
 			{
-				std::cout << ec.message() << "\n";
+				ERROR(ec.message());
 			}
 		});
 }
@@ -85,16 +85,16 @@ void Session::do_write()
 				self->_messageSize = 0;
 				self->receivedLength = 0;
 				self->_receiveData.clear();
-				std::cout << length << "\n";
+				INFO("Wrote: " + std::to_string( length ) + " bytes");
 				do_read();
 			}
 			else if (ec == boost::asio::error::connection_reset)
 			{
-				std::cout << "Client aborted the connection.\n";
+				WARN("Client aborted the connection.");
 			}
 			else
 			{
-				std::cout << ec.message() << "\n";
+				ERROR(ec.message());
 			}
 		});
 }

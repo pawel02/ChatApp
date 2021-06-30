@@ -15,15 +15,23 @@ file(GLOB_RECURSE NETWORKING
     PRIVATE "${PROJECT_SOURCE_DIR}/Networking/*.cpp"
 )
 
+file(GLOB_RECURSE LOGGER
+    PRIVATE "${PROJECT_SOURCE_DIR}/Logger/*.hpp"
+    PRIVATE "${PROJECT_SOURCE_DIR}/Logger/*.cpp"
+)
+
 
 add_library(${PROJECT_NAME} 
     Source.cpp
     ${CONTAINERS}
     ${NETWORKING}
+    ${LOGGER}
 )
 
 source_group("Containers"                FILES ${CONTAINERS})
 source_group("Networking"                FILES ${NETWORKING})
+source_group("Logger"                    FILES ${LOGGER})
+
 
 find_package(OpenSSL REQUIRED)
 

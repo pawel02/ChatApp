@@ -25,7 +25,7 @@ bool Client::verify_certificate(bool preverified, boost::asio::ssl::verify_conte
 	char subject_name[256];
 	X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
 	X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-	std::cout << "Verifying " << subject_name << "\n";
+	INFO(std::string{ "Verifying " + std::string{subject_name} });
 	return preverified;
 }
 
@@ -50,13 +50,13 @@ void Client::connect()
 					}
 					else
 					{
-						std::cerr << ec.message() << "\n";
+						ERROR(ec.message());
 						stop();
 					}
 				}
 				else
 				{
-					std::cout << "Failed to open a socket\n";
+					ERROR("Failed to open a socket");
 					stop();
 				}
 				
@@ -65,7 +65,7 @@ void Client::connect()
 	}
 	else
 	{
-		std::cerr << ec.message() << "\n";
+		ERROR(ec.message());
 		stop();
 	}
 }
@@ -82,7 +82,7 @@ void Client::handshake()
 			}
 			else 
 			{
-				std::cout << "Handshake failed\n";
+				ERROR("Handshake failed");
 			}
 		});
 }
@@ -111,7 +111,7 @@ void Client::do_write()
 			}
 			else
 			{
-				std::cerr << ec.message() << "\n";
+				ERROR(ec.message());
 				self->stop();
 			}
 		});
@@ -161,7 +161,7 @@ void Client::do_read()
 			}
 			else
 			{
-				std::cerr << ec.message() << "\n";
+				ERROR(ec.message());
 				self->stop();
 			}
 		
@@ -183,7 +183,7 @@ void Client::check_deadline()
 
 	if (_deadline.expiry() <= boost::asio::steady_timer::clock_type::now())
 	{
-		std::cout << "Expired\n";
+		ERROR("Timeout");
 		_stopped = true;
 		boost::system::error_code ignored_error;
 		_socket.lowest_layer().close(ignored_error);
