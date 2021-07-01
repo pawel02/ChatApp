@@ -11,8 +11,13 @@ file(GLOB_RECURSE CORE
 )
 
 file(GLOB_RECURSE UI 
-    PRIVATE "${PROJECT_SOURCE_DIR}/UI/*.hpp"
-    PRIVATE "${PROJECT_SOURCE_DIR}/UI/*.cpp"
+    PRIVATE "${PROJECT_SOURCE_DIR}/UI/basic.hpp"
+    PRIVATE "${PROJECT_SOURCE_DIR}/UI/basic.cpp"
+)
+
+file(GLOB_RECURSE COMMANDS 
+    PRIVATE "${PROJECT_SOURCE_DIR}/UI/Commands/*.hpp"
+    PRIVATE "${PROJECT_SOURCE_DIR}/UI/Commands/*.cpp"
 )
 
 file(GLOB_RECURSE UTILS 
@@ -26,11 +31,13 @@ add_executable(${PROJECT_NAME}
     ${CORE} 
     ${UI}
     ${UTILS}
+    ${COMMANDS}
 )
 
 source_group("Core"                FILES ${CORE})
 source_group("UI"                  FILES ${UI})
 source_group("Utils"               FILES ${UTILS})
+source_group("Commands"            FILES ${COMMANDS})
 
 find_package(OpenSSL REQUIRED)
 

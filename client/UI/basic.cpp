@@ -1,6 +1,10 @@
 #include <iostream>
+#include <algorithm>
 #include <thread>
 #include "basic.hpp"
+#include "./Commands/CommandHelp.hpp"
+#include "./Commands/CommandDisconnect.hpp"
+#include "./Commands/CommandText.hpp"
 
 using namespace Networking;
 
@@ -8,6 +12,12 @@ BasicUI::BasicUI(Containers::tsQueue<DataTypes::CommunicateData<std::vector<uint
 	Containers::tsQueue<DataTypes::CommunicateData<Serialization::ISerializable>>* writeQueue) noexcept
 	:_receiveQueue{receiveQueue}, _writeQueue{writeQueue}
 {
+	// Add all the commands that you want to handle here
+	_commands.emplace_back(std::make_unique<CommandHelp>(CommandHelp{ &_commands  }));
+	_commands.emplace_back(std::make_unique<CommandDisconnect>(CommandDisconnect{ _writeQueue }));
+
+	// Needs to go at the end
+	_commands.emplace_back(std::make_unique<CommandText>(CommandText{ _writeQueue }));
 }
 
 void BasicUI::start()
@@ -34,8 +44,26 @@ void BasicUI::handleInput()
 		std::string input;
 		std::getline(std::cin, input);
 
-		std::shared_ptr<DataTypes::stringSerialize> tmp = std::make_shared<DataTypes::stringSerialize>(input);
-		_writeQueue->push(DataTypes::CommunicateData<Serialization::ISerializable>{ tmp, input.size() });
+		std::string inputLower = input;
+		std::for_each(inputLower.begin(), inputLower.end(), [](char& c) {
+			c = ::tolower(c);
+		});
+
+		// Find the correct command in the vector and use it
+		bool isHandled = false;
+		for (auto&& command : _commands)
+		{
+			if (command->isCommand(input))
+			{
+				command->handleCommand(input);
+				isHandled = true;
+				break;
+			}
+		}
+		if (!isHandled)
+		{
+			ERROR("Did not handle the command");
+		}
 	}
 }
 

@@ -1,15 +1,20 @@
 #pragma once
+#include <vector>
+#include <memory>
 #include <CommonLib.hpp>
-
+#include "./Commands/Command.hpp"
 
 /*
 Simple Command line UI
 */
 class BasicUI
 {
+	template<typename T>
+	using tsQueue = Containers::tsQueue<Networking::DataTypes::CommunicateData<T>>;
+
 public:
-	BasicUI(Containers::tsQueue<Networking::DataTypes::CommunicateData<std::vector<uint8_t>>>* receiveQueue,
-		Containers::tsQueue<Networking::DataTypes::CommunicateData<Networking::Serialization::ISerializable>>* writeQueue) noexcept;
+	BasicUI(tsQueue<std::vector<uint8_t>>* receiveQueue,
+		tsQueue<Networking::Serialization::ISerializable>* writeQueue) noexcept;
 
 	void start();
 
@@ -18,6 +23,8 @@ private:
 	void handleReceive();
 
 private:
-	Containers::tsQueue<Networking::DataTypes::CommunicateData<std::vector<uint8_t>>>* _receiveQueue;
-	Containers::tsQueue<Networking::DataTypes::CommunicateData<Networking::Serialization::ISerializable>>* _writeQueue;
+	tsQueue<std::vector<uint8_t>>* _receiveQueue;
+	tsQueue<Networking::Serialization::ISerializable>* _writeQueue;
+
+	std::vector<std::unique_ptr<Command>> _commands;
 };

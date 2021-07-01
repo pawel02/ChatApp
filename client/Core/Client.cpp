@@ -92,6 +92,14 @@ void Client::do_write()
 	// get the latest message in the queue
 	DataTypes::CommunicateData writeData = _writeQueue.pop();
 
+	// This means that the UI wants to end the application
+	if (writeData._size == 0)
+	{
+		INFO("Shutting down client connection\n");
+		stop();
+		return;
+	}
+
 	_deadline.expires_after(std::chrono::seconds(expiryTime));
 	auto self{ shared_from_this() };
 

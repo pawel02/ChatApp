@@ -15,6 +15,9 @@ class Client : public std::enable_shared_from_this<Client>
 {
 	using tcp = boost::asio::ip::tcp;
 
+	template<typename T>
+	using tsQueue = Containers::tsQueue<Networking::DataTypes::CommunicateData<T>>;
+
 public:
 	Client(boost::asio::io_context* ctx, const std::string& host
 		, const std::string& port ) noexcept;
@@ -22,8 +25,8 @@ public:
 	void connect();
 
 	// So that the UI can get a reference and then add to these queues
-	Containers::tsQueue<Networking::DataTypes::CommunicateData<Networking::Serialization::ISerializable>>* writeQueue() noexcept { return &_writeQueue; }
-	Containers::tsQueue<Networking::DataTypes::CommunicateData<std::vector<uint8_t>>>* receiveQueue() noexcept { return &_receiveQueue; }
+	tsQueue<Networking::Serialization::ISerializable>* writeQueue() noexcept { return &_writeQueue; }
+	tsQueue<std::vector<uint8_t>>* receiveQueue() noexcept { return &_receiveQueue; }
 
 private:
 	// This is only used to check if the verification of certificate was successful
@@ -62,7 +65,7 @@ private:
 	std::vector<uint8_t> _receiveData;
 
 	// Queues for communicating between the UI and this thread
-	Containers::tsQueue<Networking::DataTypes::CommunicateData<Networking::Serialization::ISerializable>> _writeQueue;
-	Containers::tsQueue<Networking::DataTypes::CommunicateData<std::vector<uint8_t>>> _receiveQueue;
+	tsQueue<Networking::Serialization::ISerializable> _writeQueue;
+	tsQueue<std::vector<uint8_t>> _receiveQueue;
 
 };
